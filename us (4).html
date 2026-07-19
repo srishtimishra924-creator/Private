@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Just Us</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FFF8F2;
+  --cream-2:#FFF1E8;
+  --blush:#FFD9E3;
+  --blush-2:#FFC4D6;
+  --rose:#E85D75;
+  --rose-dark:#C43F5E;
+  --plum:#3B1C32;
+  --plum-soft:#6B4059;
+  --gold:#D4A24C;
+  --sage:#93AD82;
+  --white:#FFFFFF;
+  --shadow: 0 12px 30px -12px rgba(59,28,50,0.25);
+  --radius: 22px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:'Quicksand',sans-serif;
+  background:
+    radial-gradient(circle at 15% 20%, #FFE3EC 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, #FFE9D9 0%, transparent 45%),
+    var(--cream);
+  color:var(--plum);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+h1,h2,h3{font-family:'Playfair Display',serif; margin:0; font-weight:600;}
+.script{font-family:'Caveat',cursive;}
+button{font-family:inherit;}
+::selection{background:var(--blush-2);}
+
+/* floating hearts background */
+#hearts-bg{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
+.floaty-heart{position:absolute; bottom:-10%; font-size:20px; opacity:.35; animation:floatUp linear infinite;}
+@keyframes floatUp{
+  0%{transform:translateY(0) rotate(0deg); opacity:0;}
+  10%{opacity:.4;}
+  90%{opacity:.3;}
+  100%{transform:translateY(-115vh) rotate(25deg); opacity:0;}
+}
+
+.app-wrap{position:relative; z-index:1; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+
+/* ---------- Screens / slides ---------- */
+.screen{
+  display:none;
+  width:100%;
+  max-width:560px;
+  animation:slideIn .5s cubic-bezier(.2,.8,.2,1);
+}
+.screen.wide{max-width:920px;}
+.screen.active{display:block;}
+@keyframes slideIn{
+  from{opacity:0; transform:translateY(18px) scale(.98);}
+  to{opacity:1; transform:translateY(0) scale(1);}
+}
+
+.card{
+  background:var(--white);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:38px 34px;
+  position:relative;
+  border:1px solid rgba(232,93,117,.08);
+}
+
+/* top bar with back button, shown on every step */
+.top-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18px;
+  min-height:38px;
+}
+.back-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--blush); color:var(--rose-dark);
+  border:none; border-radius:50px; padding:9px 16px 9px 12px;
+  font-weight:600; font-size:14px; cursor:pointer;
+  transition:transform .15s ease, background .15s ease;
+}
+.back-btn:hover{background:var(--blush-2); transform:translateX(-2px);}
+.back-btn:active{transform:scale(.96);}
+.back-spacer{visibility:hidden;}
+
+.progress-dots{display:flex; gap:7px; justify-content:center; margin:0 auto;}
+.progress-dots span{width:7px; height:7px; border-radius:50%; background:var(--blush-2);}
+.progress-dots span.on{background:var(--rose); width:20px; border-radius:6px; transition:all .25s ease;}
+
+/* headings */
+.eyebrow{font-family:'Caveat',cursive; font-size:22px; color:var(--rose); margin-bottom:2px; display:block;}
+.title{font-size:30px; line-height:1.15; margin-bottom:8px;}
+.subtitle{color:var(--plum-soft); font-size:15px; line-height:1.5; margin-bottom:26px;}
+
+/* inputs */
+label.field-label{display:block; font-size:13.5px; font-weight:700; color:var(--plum-soft); margin:16px 0 7px;}
+input[type=text], input[type=date], input[type=password], input[type=number], textarea{
+  width:100%; padding:13px 15px; border-radius:14px; border:2px solid var(--blush);
+  background:var(--cream); font-family:inherit; font-size:15px; color:var(--plum);
+  outline:none; transition:border .15s ease, background .15s ease;
+}
+input:focus, textarea:focus{border-color:var(--rose); background:#fff;}
+textarea{resize:none;}
+
+.btn{
+  border:none; border-radius:50px; padding:14px 26px; font-weight:700; font-size:15px;
+  cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  width:100%; margin-top:22px;
+}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:linear-gradient(135deg, var(--rose), var(--rose-dark)); color:#fff; box-shadow:0 10px 20px -8px rgba(200,60,90,.55);}
+.btn-primary:hover{box-shadow:0 14px 24px -8px rgba(200,60,90,.65);}
+.btn-ghost{background:var(--blush); color:var(--rose-dark);}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+
+/* emoji / color pickers */
+.picker-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:6px;}
+.pick-emoji{
+  aspect-ratio:1; border-radius:12px; border:2px solid transparent; background:var(--cream);
+  font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.pick-emoji.sel{border-color:var(--rose); background:var(--blush);}
+.color-row{display:flex; gap:10px; margin-top:8px;}
+.pick-color{width:30px; height:30px; border-radius:50%; cursor:pointer; border:3px solid transparent;}
+.pick-color.sel{border-color:var(--plum); transform:scale(1.1);}
+
+/* envelope on welcome */
+.envelope-wrap{display:flex; justify-content:center; margin-bottom:10px;}
+.envelope{width:150px; height:100px; position:relative;}
+.envelope .body{position:absolute; inset:0; background:var(--blush); border-radius:10px; box-shadow:0 10px 24px -10px rgba(200,60,90,.5);}
+.envelope .flap{
+  position:absolute; top:0; left:0; width:0; height:0;
+  border-left:75px solid transparent; border-right:75px solid transparent; border-top:55px solid var(--rose);
+  border-radius:6px 6px 0 0;
+}
+.envelope .seal{position:absolute; top:38px; left:65px; width:20px; height:20px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; box-shadow:0 3px 8px rgba(0,0,0,.2);}
+
+/* who am i cards */
+.whoami-cards{display:flex; gap:14px; margin-top:6px;}
+.who-card{flex:1; border:2px solid var(--blush); border-radius:16px; padding:18px 10px; text-align:center; cursor:pointer; background:var(--cream); transition:all .15s ease;}
+.who-card .em{font-size:34px; display:block; margin-bottom:8px;}
+.who-card.sel{border-color:var(--rose); background:var(--blush); transform:translateY(-3px);}
+
+/* -------- APP SHELL -------- */
+.app-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;}
+.app-header .who{display:flex; align-items:center; gap:10px;}
+.avatar-chip{width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 10px rgba(0,0,0,.12);}
+.days-badge{background:var(--plum); color:#fff; padding:5px 14px; border-radius:50px; font-size:12.5px; font-weight:700; letter-spacing:.3px;}
+.icon-btn{background:var(--blush); border:none; width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;}
+
+/* home map */
+.map-title{text-align:center; margin-bottom:26px;}
+.island-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+.island{
+  background:var(--white); border-radius:20px; padding:20px 10px; text-align:center; cursor:pointer;
+  box-shadow:0 10px 22px -12px rgba(59,28,50,.2); border:1px solid rgba(232,93,117,.08);
+  transition:transform .18s ease, box-shadow .18s ease;
+  animation:bob 4s ease-in-out infinite;
+}
+.island:nth-child(2n){animation-delay:.6s;}
+.island:nth-child(3n){animation-delay:1.2s;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.island:hover{transform:translateY(-10px) scale(1.03); box-shadow:0 16px 28px -12px rgba(59,28,50,.3);}
+.island .ic{font-size:30px; display:block; margin-bottom:8px;}
+.island .lb{font-weight:700; font-size:14px;}
+.island .ds{font-size:11.5px; color:var(--plum-soft); margin-top:2px;}
+
+/* CHAT */
+.chat-box{height:380px; overflow-y:auto; background:var(--cream); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:10px;}
+.bubble{max-width:72%; padding:10px 14px; border-radius:16px; font-size:14.5px; line-height:1.4; position:relative;}
+.bubble.me{align-self:flex-end; background:linear-gradient(135deg,var(--rose),var(--rose-dark)); color:#fff; border-bottom-right-radius:4px;}
+.bubble.them{align-self:flex-start; background:#fff; border:1px solid var(--blush); border-bottom-left-radius:4px;}
+.bubble .meta{display:block; font-size:10px; opacity:.7; margin-top:4px;}
+.typing{align-self:flex-start; font-size:12.5px; color:var(--plum-soft); font-style:italic;}
+.chat-input-row{display:flex; gap:10px; margin-top:14px;}
+.chat-input-row input{flex:1;}
+.send-btn{background:var(--rose); color:#fff; border:none; width:48px; border-radius:14px; cursor:pointer; font-size:18px;}
+
+/* GAMES */
+.game-hub-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.game-card{background:var(--cream); border-radius:18px; padding:22px; text-align:center; cursor:pointer; border:2px solid transparent;}
+.game-card:hover{border-color:var(--rose);}
+.game-card .ic{font-size:36px; display:block; margin-bottom:8px;}
+.turn-banner{text-align:center; font-weight:700; margin-bottom:14px; padding:10px; border-radius:12px; background:var(--blush); color:var(--rose-dark);}
+.ttt-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:280px; margin:0 auto;}
+.ttt-cell{aspect-ratio:1; background:var(--cream); border-radius:14px; border:none; font-size:32px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+.ttt-cell:hover{background:var(--blush);}
+.mem-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; max-width:340px; margin:0 auto;}
+.mem-card{aspect-ratio:1; border-radius:12px; background:var(--rose); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:24px; color:transparent; transition:transform .3s;}
+.mem-card.flip{background:var(--cream); color:var(--plum); border:2px solid var(--blush);}
+.mem-card.matched{background:var(--sage); color:#fff; opacity:.7;}
+
+/* LOVE NOTES */
+.notes-board{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; min-height:80px;}
+.sticky-note{
+  background:var(--gold); color:var(--plum); border-radius:4px 14px 14px 4px;
+  padding:14px 14px 30px; font-size:14px; line-height:1.4; position:relative;
+  box-shadow:0 8px 16px -6px rgba(0,0,0,.25);
+  transform:rotate(var(--rot,-2deg));
+  animation:pinDrop .35s ease;
+  word-break:break-word;
+}
+.sticky-note:nth-child(3n+1){background:var(--blush-2); --rot:2deg;}
+.sticky-note:nth-child(3n+2){background:#FFE6A7; --rot:-3deg;}
+.sticky-note:nth-child(3n){background:#C9F0D8; --rot:1.5deg;}
+@keyframes pinDrop{from{opacity:0; transform:translateY(-10px) rotate(var(--rot,0deg)) scale(.9);}to{opacity:1; transform:translateY(0) rotate(var(--rot,0deg)) scale(1);}}
+.sticky-note .sn-author{position:absolute; bottom:8px; left:14px; font-size:11px; font-weight:700; opacity:.7;}
+.sticky-note .sn-erase{position:absolute; top:6px; right:8px; background:rgba(255,255,255,.55); border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:11px; line-height:1;}
+.sticky-note .sn-erase:hover{background:#fff;}
+.notes-empty{grid-column:1/-1; text-align:center; color:var(--plum-soft); font-size:14px; padding:20px 0;}
+
+/* VIDEO */
+.video-stage{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.video-panel{background:var(--plum); border-radius:18px; aspect-ratio:4/3; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; color:#fff;}
+.video-panel video{width:100%; height:100%; object-fit:cover;}
+.video-panel .label{position:absolute; bottom:8px; left:10px; background:rgba(0,0,0,.35); padding:3px 10px; border-radius:50px; font-size:12px;}
+.pulse-heart{font-size:40px; animation:pulse 1.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1); opacity:.8;}50%{transform:scale(1.25); opacity:1;}}
+.call-controls{display:flex; justify-content:center; gap:14px; margin-top:20px;}
+.ctrl-btn{width:52px; height:52px; border-radius:50%; border:none; font-size:20px; cursor:pointer; background:var(--blush); color:var(--rose-dark);}
+.ctrl-btn.end{background:#E14A4A; color:#fff;}
+.ctrl-btn.off{background:var(--plum); color:#fff;}
+
+/* CALENDAR */
+.cal-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; text-align:center;}
+.cal-grid .dow{font-size:11px; font-weight:700; color:var(--plum-soft); padding-bottom:4px;}
+.cal-day{aspect-ratio:1; border-radius:10px; background:var(--cream); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:13px; cursor:pointer; position:relative; border:2px solid transparent;}
+.cal-day.empty{background:transparent; cursor:default;}
+.cal-day.today{border-color:var(--gold);}
+.cal-day .dot{width:5px; height:5px; border-radius:50%; background:var(--rose); position:absolute; bottom:5px;}
+.event-list{margin-top:18px;}
+.event-item{display:flex; justify-content:space-between; align-items:center; background:var(--cream); padding:10px 14px; border-radius:12px; margin-bottom:8px; font-size:13.5px;}
+.event-item .del{cursor:pointer; color:var(--rose-dark); font-weight:700;}
+.mini-form{display:flex; gap:8px; margin-top:12px;}
+.mini-form input{flex:1;}
+
+/* MUSIC */
+.now-playing{background:linear-gradient(135deg,var(--plum),var(--plum-soft)); color:#fff; border-radius:18px; padding:20px; display:flex; align-items:center; gap:16px; margin-bottom:20px;}
+.vinyl{width:56px; height:56px; border-radius:50%; background:repeating-radial-gradient(circle, #222 0 2px, #444 2px 4px); position:relative; flex-shrink:0;}
+.vinyl::after{content:""; position:absolute; inset:22px; background:var(--rose); border-radius:50%;}
+.vinyl.spin{animation:spin 3s linear infinite;}
+@keyframes spin{from{transform:rotate(0);}to{transform:rotate(360deg);}}
+.eq{display:flex; align-items:flex-end; gap:3px; height:22px; margin-left:auto;}
+.eq span{width:4px; background:var(--gold); border-radius:2px; animation:eqbar 1s ease-in-out infinite;}
+.eq span:nth-child(2){animation-delay:.2s;} .eq span:nth-child(3){animation-delay:.4s;} .eq span:nth-child(4){animation-delay:.1s;}
+@keyframes eqbar{0%,100%{height:5px;}50%{height:20px;}}
+.playlist-item{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; background:var(--cream); margin-bottom:8px;}
+.playlist-item .play-mini{cursor:pointer; font-size:16px;}
+.song-meta{flex:1;}
+.song-meta b{font-size:14px;} .song-meta div{font-size:11.5px; color:var(--plum-soft);}
+.add-song-form{display:flex; gap:8px; margin-top:16px;}
+
+/* PHOTOS */
+.photo-upload{border:2px dashed var(--blush-2); border-radius:16px; padding:22px; text-align:center; cursor:pointer; margin-bottom:18px;}
+.photo-upload:hover{background:var(--cream);}
+.photo-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.photo-thumb{aspect-ratio:1; border-radius:14px; overflow:hidden; cursor:pointer; position:relative;}
+.photo-thumb img{width:100%; height:100%; object-fit:cover;}
+.photo-empty{text-align:center; color:var(--plum-soft); font-size:14px; padding:30px 0;}
+.lightbox{position:fixed; inset:0; background:rgba(59,28,50,.85); z-index:50; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;}
+.lightbox img{max-width:88vw; max-height:65vh; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,.4);}
+.lightbox input{width:280px; text-align:center;}
+.lightbox .lb-actions{display:flex; gap:10px;}
+
+/* SETTINGS */
+.settings-section{margin-bottom:24px;}
+.settings-section h3{font-size:16px; margin-bottom:10px; color:var(--rose-dark);}
+.partner-edit{display:flex; gap:14px; align-items:center; margin-bottom:10px;}
+.partner-edit .av-sm{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;}
+.logout-btn{background:var(--plum); color:#fff;}
+
+.footer-note{text-align:center; font-size:11.5px; color:var(--plum-soft); margin-top:18px; opacity:.75;}
+
+@media(max-width:640px){
+  .island-grid{grid-template-columns:repeat(2,1fr);}
+  .video-stage{grid-template-columns:1fr;}
+  .card{padding:28px 20px;}
+}
+</style>
+</head>
+<body>
+
+<div id="hearts-bg"></div>
+
+<div class="app-wrap">
+
+  <!-- ============ ONBOARDING ============ -->
+
+  <section class="screen active" id="s-welcome">
+    <div class="card">
+      <div class="top-bar"><span class="back-spacer">x</span><span></span></div>
+      <div class="envelope-wrap">
+        <div class="envelope"><div class="body"></div><div class="flap"></div><div class="seal">♥</div></div>
+      </div>
+      <div style="text-align:center;">
+        <span class="eyebrow">a little corner of the internet</span>
+        <h1 class="title">Just for the two of you</h1>
+        <p class="subtitle">A private little world to talk, play, video call, plan dates, share songs and keep photos that are just yours. Nobody else gets in.</p>
+      </div>
+      <button class="btn btn-primary" onclick="goTo('s-names')">Begin our story →</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-names">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <div class="progress-dots"><span class="on"></span><span></span><span></span><span></span><span></span></div>
+        <span class="back-spacer">x</span>
+      </div>
+      <span class="eyebrow">chapter one</span>
+      <h2 class="title">What should we call this place?</h2>
+      <p class="subtitle">Give your little space a name, and tell us when your story started.</p>
+      <label class="field-label">Our space is called</label>
+      <input type="text" id="coupleName" placeholder="e.g. Sam &amp; Alex's Hideaway">
+      <label class="field-label">Together since</label>
+      <input type="date" id="anniversary">
+      <button class="btn btn-primary" id="btn-names-next" onclick="saveNames()" disabled>Next →</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-partner1">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <div class="progress-dots"><span class="on"></span><span class="on"></span><span></span><span></span><span></span></div>
+        <span class="back-spacer">x</span>
+      </div>
+      <span class="eyebrow">chapter two</span>
+      <h2 class="title">Hi, Partner One 👋</h2>
+      <p class="subtitle">What should your other half call you?</p>
+      <label class="field-label">My nickname</label>
+      <input type="text" id="p1name" placeholder="e.g. Bug, Sunshine, Bear...">
+      <label class="field-label">Pick your icon</label>
+      <div class="picker-grid" id="p1emoji"></div>
+      <label class="field-label">Pick your color</label>
+      <div class="color-row" id="p1color"></div>
+      <button class="btn btn-primary" id="btn-p1-next" onclick="savePartner(1)" disabled>Next →</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-partner2">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <div class="progress-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></div>
+        <span class="back-spacer">x</span>
+      </div>
+      <span class="eyebrow">chapter three</span>
+      <h2 class="title">And you, Partner Two? 👋</h2>
+      <p class="subtitle">Now the other half of the story.</p>
+      <label class="field-label">My nickname</label>
+      <input type="text" id="p2name" placeholder="e.g. Love, Tiger, Peach...">
+      <label class="field-label">Pick your icon</label>
+      <div class="picker-grid" id="p2emoji"></div>
+      <label class="field-label">Pick your color</label>
+      <div class="color-row" id="p2color"></div>
+      <button class="btn btn-primary" id="btn-p2-next" onclick="savePartner(2)" disabled>Next →</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-pin">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <div class="progress-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></div>
+        <span class="back-spacer">x</span>
+      </div>
+      <span class="eyebrow">chapter four</span>
+      <h2 class="title">Keep it just between you two</h2>
+      <p class="subtitle">Set a secret word or pin so only the two of you can get in.</p>
+      <label class="field-label">Our secret pin</label>
+      <input type="password" id="pinInput" placeholder="something only you two know">
+      <button class="btn btn-primary" onclick="savePin()">Next →</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-whoami">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" id="whoami-back" onclick="goBack()">← Back</button>
+        <div class="progress-dots"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span></div>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="envelope-wrap" style="margin-bottom:6px;">
+        <div class="envelope" style="width:110px;height:74px;">
+          <div class="body"></div><div class="flap" style="border-left-width:55px;border-right-width:55px;border-top-width:40px;"></div>
+          <div class="seal" style="top:26px;left:47px;">♥</div>
+        </div>
+      </div>
+      <h2 class="title" style="text-align:center;">Welcome back 💌</h2>
+      <p class="subtitle" style="text-align:center;">Who's peeking in right now?</p>
+      <div class="whoami-cards" id="whoamiCards"></div>
+      <label class="field-label">Secret pin</label>
+      <input type="password" id="loginPin" placeholder="enter your pin">
+      <button class="btn btn-primary" onclick="doLogin()">Step inside →</button>
+      <p class="footer-note">This is a private, just-the-two-of-you space. Nobody else can see it.</p>
+    </div>
+  </section>
+
+  <!-- ============ APP SCREENS ============ -->
+
+  <section class="screen wide" id="s-home">
+    <div class="card">
+      <div class="app-header">
+        <div class="who">
+          <div class="avatar-chip" id="home-avatar"></div>
+          <div>
+            <div style="font-weight:700; font-size:15px;" id="home-greeting">Hi!</div>
+            <span class="days-badge" id="home-days">Day 1</span>
+          </div>
+        </div>
+        <button class="icon-btn" title="Switch person" onclick="switchPerson()">⇄</button>
+      </div>
+      <div class="map-title">
+        <span class="eyebrow" id="home-couplename">Our space</span>
+        <h1 class="title">Where to today? 🗺️</h1>
+      </div>
+      <div class="island-grid">
+        <div class="island" onclick="goTo('s-chat')"><span class="ic">💬</span><span class="lb">Whispers</span><div class="ds">chat</div></div>
+        <div class="island" onclick="goTo('s-games')"><span class="ic">🎲</span><span class="lb">Play</span><div class="ds">games</div></div>
+        <div class="island" onclick="goTo('s-video')"><span class="ic">📹</span><span class="lb">Face time</span><div class="ds">video call</div></div>
+        <div class="island" onclick="goTo('s-calendar')"><span class="ic">🗓️</span><span class="lb">Our Days</span><div class="ds">calendar</div></div>
+        <div class="island" onclick="goTo('s-music')"><span class="ic">🎵</span><span class="lb">Our Songs</span><div class="ds">music</div></div>
+        <div class="island" onclick="goTo('s-photos')"><span class="ic">📸</span><span class="lb">Memories</span><div class="ds">photos</div></div>
+        <div class="island" onclick="goTo('s-settings')"><span class="ic">⚙️</span><span class="lb">Us</span><div class="ds">settings</div></div>
+      </div>
+      <p class="footer-note">Everything here stays just between the two of you 💕</p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-chat">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>💬 Whispers</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Say something sweet..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="send-btn" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-games">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>🎲 Play</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="game-hub-grid">
+        <div class="game-card" onclick="openTTT()"><span class="ic">❌⭕</span><div style="font-weight:700;">Tic Tac Toe</div><div class="ds" style="color:var(--plum-soft);font-size:12px;">quick &amp; classic</div></div>
+        <div class="game-card" onclick="openMemory()"><span class="ic">🃏</span><div style="font-weight:700;">Memory Match</div><div class="ds" style="color:var(--plum-soft);font-size:12px;">find the pairs</div></div>
+        <div class="game-card" onclick="openNotes()"><span class="ic">📝</span><div style="font-weight:700;">Love Notes</div><div class="ds" style="color:var(--plum-soft);font-size:12px;">write &amp; erase</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-ttt">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>❌⭕ Tic Tac Toe</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="turn-banner" id="tttBanner">-</div>
+      <div class="ttt-grid" id="tttGrid"></div>
+      <button class="btn btn-ghost" onclick="resetTTT()">Reset board</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-memory">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>🃏 Memory Match</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="turn-banner" id="memBanner">Find the matching pairs</div>
+      <div class="mem-grid" id="memGrid"></div>
+      <button class="btn btn-ghost" onclick="resetMemory()">Shuffle again</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-notes">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>📝 Love Notes</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <p class="subtitle" style="margin-bottom:14px;">Pin a little note for them to find. Either of you can erase any note — nothing here is permanent 💌</p>
+      <div class="mini-form" style="margin-bottom:16px;">
+        <input type="text" id="noteInput" placeholder="Write something sweet..." onkeydown="if(event.key==='Enter')addNote()">
+        <button class="btn btn-primary" style="width:auto;margin:0;padding:12px 18px;" onclick="addNote()">Pin it</button>
+      </div>
+      <div class="notes-board" id="notesBoard"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-video">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="endCall()">← Back</button>
+        <h3>📹 Face time</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="video-stage">
+        <div class="video-panel" id="myPanel"><span class="pulse-heart">📷</span><div class="label" id="myLabel">You</div></div>
+        <div class="video-panel" id="theirPanel"><span class="pulse-heart">💗</span><div class="label" id="theirLabel">Calling...</div></div>
+      </div>
+      <div class="call-controls">
+        <button class="ctrl-btn" id="micBtn" onclick="toggleMic()">🎙️</button>
+        <button class="ctrl-btn" id="camBtn" onclick="toggleCam()">📷</button>
+        <button class="ctrl-btn end" onclick="endCall()">📞</button>
+      </div>
+      <p class="footer-note">A cozy preview of video calling — turn your camera on to see yourself here.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-calendar">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>🗓️ Our Days</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="cal-nav">
+        <button class="icon-btn" onclick="changeMonth(-1)">‹</button>
+        <div style="font-weight:700;" id="calMonthLabel">Month</div>
+        <button class="icon-btn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div id="calAddForm" style="display:none;">
+        <div class="mini-form">
+          <input type="text" id="eventTitle" placeholder="What's happening?">
+          <button class="btn btn-primary" style="width:auto;margin:0;padding:12px 18px;" onclick="addEvent()">Add</button>
+        </div>
+      </div>
+      <div class="event-list" id="eventList"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-music">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>🎵 Our Songs</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="now-playing" id="nowPlaying">
+        <div class="vinyl" id="vinyl"></div>
+        <div>
+          <div style="font-size:11px; opacity:.75;">NOW PLAYING</div>
+          <b id="npTitle">Nothing yet</b>
+          <div style="font-size:12px; opacity:.8;" id="npArtist">Add a song below</div>
+        </div>
+        <div class="eq" id="eqBars"><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div id="playlist"></div>
+      <label class="photo-upload" for="audioUploadInput" style="margin-top:16px; display:block;">🎧 Upload a song from your device to actually hear it play</label>
+      <input type="file" id="audioUploadInput" accept="audio/*" style="display:none" onchange="uploadSong(event)">
+      <audio id="audioPlayer" onended="onSongEnded()"></audio>
+      <div class="add-song-form">
+        <input type="text" id="songTitle" placeholder="Song title">
+        <input type="text" id="songArtist" placeholder="Artist">
+        <button class="btn btn-primary" style="width:auto;margin:0;padding:12px 18px;" onclick="addSong()">Add (title only)</button>
+      </div>
+      <p class="footer-note">Titles added here are labels only — no sound. Upload an audio file above for real playback. We can't provide copyrighted songs directly.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-photos">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>📸 Memories</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <label class="photo-upload" for="photoInput">📎 Tap to add a photo — only the two of you will ever see it</label>
+      <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="addPhotos(event)">
+      <div id="photoGrid" class="photo-grid"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-settings">
+    <div class="card">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h3>⚙️ Us</h3>
+        <span class="back-spacer">x</span>
+      </div>
+      <div class="settings-section">
+        <h3>Our space</h3>
+        <label class="field-label">Name</label>
+        <input type="text" id="set-coupleName">
+        <label class="field-label">Together since</label>
+        <input type="date" id="set-anniversary">
+      </div>
+      <div class="settings-section">
+        <h3>Nicknames</h3>
+        <div class="partner-edit"><div class="av-sm" id="set-av1"></div><input type="text" id="set-p1name"></div>
+        <div class="partner-edit"><div class="av-sm" id="set-av2"></div><input type="text" id="set-p2name"></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()">Save changes</button>
+      <button class="btn logout-btn" style="width:100%;" onclick="logout()">Switch / Log out</button>
+    </div>
+  </section>
+
+</div>
+
+<div id="lightboxHost"></div>
+
+<script>
+/* ============ floating hearts backdrop ============ */
+(function(){
+  const host = document.getElementById('hearts-bg');
+  const symbols = ['💗','💕','💖','♥'];
+  for(let i=0;i<14;i++){
+    const el = document.createElement('span');
+    el.className='floaty-heart';
+    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    el.style.left = Math.random()*100+'%';
+    el.style.fontSize = (14+Math.random()*18)+'px';
+    el.style.animationDuration = (10+Math.random()*14)+'s';
+    el.style.animationDelay = (Math.random()*10)+'s';
+    host.appendChild(el);
+  }
+})();
+
+/* ============ state ============ */
+const state = {
+  coupleName:'', anniversary:'',
+  partners:[
+    {nickname:'', emoji:'🐻', color:'#E85D75'},
+    {nickname:'', emoji:'🐰', color:'#D4A24C'}
+  ],
+  pin:'',
+  currentUser:0,
+  messages:[],
+  events:{},
+  photos:[],
+  songs:[
+    {title:'Perfect', artist:'Ed Sheeran'},
+    {title:'All of Me', artist:'John Legend'},
+    {title:'Tum Hi Ho', artist:'Arijit Singh'},
+    {title:'Raabta', artist:'Arijit Singh'},
+    {title:'Kesariya', artist:'Arijit Singh'},
+    {title:'Tera Ban Jaunga', artist:'Akhil Sachdeva, Tulsi Kumar'},
+    {title:'Channa Mereya', artist:'Arijit Singh'},
+    {title:'Tum Se Hi', artist:'Mohit Chauhan'},
+    {title:'Agar Tum Saath Ho', artist:'Alka Yagnik, Arijit Singh'},
+    {title:'Hawayein', artist:'Arijit Singh'},
+    {title:'Tujhe Kitna Chahne Lage', artist:'Arijit Singh'},
+    {title:'Mere Sohneya', artist:'Arijit Singh, Shilpa Rao'},
+    {title:'Pehla Nasha', artist:'Udit Narayan, Sadhana Sargam'},
+    {title:'Ae Dil Hai Mushkil', artist:'Arijit Singh'},
+    {title:'Thousand Years', artist:'Christina Perri'}
+  ],
+  notes:[],
+  calDate:new Date()
+};
+
+const EMOJIS = ['🐻','🐰','🦊','🐱','🐼','🐨','🦁','🐸','🐧','🦄','🐢','🦋','🌸','⭐'];
+const COLORS = ['#E85D75','#D4A24C','#93AD82','#8E7CC3','#4EA3C9','#E8A87C'];
+
+/* ============ navigation ============ */
+let historyStack = [];
+let current = 's-welcome';
+function goTo(id, {push=true}={}){
+  if(push && current) historyStack.push(current);
+  showOnly(id);
+}
+function goBack(){
+  if(historyStack.length===0){ return; }
+  const prev = historyStack.pop();
+  showOnly(prev);
+}
+function showOnly(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  current = id;
+  onEnter(id);
+}
+function onEnter(id){
+  if(id==='s-home') renderHome();
+  if(id==='s-chat') renderChat();
+  if(id==='s-calendar') renderCalendar();
+  if(id==='s-music') renderMusic();
+  if(id==='s-photos') renderPhotos();
+  if(id==='s-notes') renderNotes();
+  if(id==='s-settings') renderSettings();
+  if(id==='s-whoami') renderWhoami();
+  if(id==='s-video') startCall();
+}
+
+/* ============ onboarding: build pickers ============ */
+function buildPicker(containerId, kind, partnerIdx){
+  const c = document.getElementById(containerId);
+  c.innerHTML='';
+  if(kind==='emoji'){
+    EMOJIS.forEach(em=>{
+      const b=document.createElement('div');
+      b.className='pick-emoji'; b.textContent=em;
+      b.onclick=()=>{ [...c.children].forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); c.dataset.value=em; validatePartnerForm(partnerIdx); };
+      c.appendChild(b);
+    });
+  }else{
+    COLORS.forEach(cl=>{
+      const b=document.createElement('div');
+      b.className='pick-color'; b.style.background=cl;
+      b.onclick=()=>{ [...c.children].forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); c.dataset.value=cl; };
+      c.appendChild(b);
+    });
+  }
+}
+buildPicker('p1emoji','emoji',1); buildPicker('p1color','color',1);
+buildPicker('p2emoji','emoji',2); buildPicker('p2color','color',2);
+// preselect defaults
+document.getElementById('p1emoji').children[0].click();
+document.getElementById('p1color').children[0].click();
+document.getElementById('p2emoji').children[1].click();
+document.getElementById('p2color').children[1].click();
+
+document.getElementById('coupleName').addEventListener('input', validateNamesForm);
+document.getElementById('anniversary').addEventListener('input', validateNamesForm);
+document.getElementById('p1name').addEventListener('input', ()=>validatePartnerForm(1));
+document.getElementById('p2name').addEventListener('input', ()=>validatePartnerForm(2));
+
+function validateNamesForm(){
+  const ok = document.getElementById('coupleName').value.trim().length>0 && document.getElementById('anniversary').value;
+  document.getElementById('btn-names-next').disabled = !ok;
+}
+function validatePartnerForm(idx){
+  const ok = document.getElementById('p'+idx+'name').value.trim().length>0;
+  document.getElementById('btn-p'+idx+'-next').disabled = !ok;
+}
+
+function saveNames(){
+  state.coupleName = document.getElementById('coupleName').value.trim();
+  state.anniversary = document.getElementById('anniversary').value;
+  goTo('s-partner1');
+}
+function savePartner(idx){
+  const name = document.getElementById('p'+idx+'name').value.trim();
+  const emoji = document.getElementById('p'+idx+'emoji').dataset.value || EMOJIS[0];
+  const color = document.getElementById('p'+idx+'color').dataset.value || COLORS[0];
+  state.partners[idx-1] = {nickname:name, emoji, color};
+  goTo(idx===1 ? 's-partner2' : 's-pin');
+}
+function savePin(){
+  const pin = document.getElementById('pinInput').value.trim();
+  state.pin = pin || '0000';
+  document.getElementById('whoami-back').style.visibility='visible';
+  goTo('s-whoami');
+}
+
+function renderWhoami(){
+  const c = document.getElementById('whoamiCards');
+  c.innerHTML='';
+  state.partners.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='who-card'; d.dataset.idx=i;
+    d.innerHTML = `<span class="em">${p.emoji}</span><div style="font-weight:700;">${p.nickname||'Partner '+(i+1)}</div>`;
+    d.onclick=()=>{ [...c.children].forEach(x=>x.classList.remove('sel')); d.classList.add('sel'); c.dataset.selected=i; };
+    c.appendChild(d);
+  });
+  if(c.children[0]) c.children[0].click();
+}
+function doLogin(){
+  const c = document.getElementById('whoamiCards');
+  const idx = parseInt(c.dataset.selected || '0');
+  const pin = document.getElementById('loginPin').value.trim();
+  if(pin !== state.pin){
+    document.getElementById('loginPin').style.borderColor = '#E14A4A';
+    document.getElementById('loginPin').placeholder = "that pin doesn't match, try again";
+    document.getElementById('loginPin').value='';
+    return;
+  }
+  state.currentUser = idx;
+  historyStack = [];
+  goTo('s-home', {push:false});
+}
+function switchPerson(){
+  historyStack = [];
+  goTo('s-whoami', {push:false});
+}
+function logout(){
+  historyStack = [];
+  goTo('s-whoami', {push:false});
+}
+
+/* ============ HOME ============ */
+function daysTogether(){
+  if(!state.anniversary) return 1;
+  const start = new Date(state.anniversary);
+  const diff = Math.floor((new Date() - start) / 86400000);
+  return diff>=0 ? diff : 0;
+}
+function renderHome(){
+  const me = state.partners[state.currentUser];
+  document.getElementById('home-avatar').style.background = me.color;
+  document.getElementById('home-avatar').textContent = me.emoji;
+  document.getElementById('home-greeting').textContent = `Hi, ${me.nickname||'love'} 👋`;
+  document.getElementById('home-days').textContent = `Day ${daysTogether()} together`;
+  document.getElementById('home-couplename').textContent = state.coupleName || 'Our space';
+}
+
+/* ============ CHAT ============ */
+const cannedReplies = ["Thinking of you right now 💭","Can't wait to see you 🥰","You just made me smile","Missing you already 💕","Tell me more!","That made my whole day","😘😘😘"];
+function otherIdx(){ return state.currentUser===0 ? 1 : 0; }
+function renderChat(){
+  const box = document.getElementById('chatBox');
+  box.innerHTML='';
+  if(state.messages.length===0){
+    box.innerHTML = '<div style="text-align:center;color:var(--plum-soft);font-size:13px;margin:auto;">No whispers yet — say something sweet 💌</div>';
+    return;
+  }
+  state.messages.forEach(m=>{
+    const b=document.createElement('div');
+    b.className = 'bubble ' + (m.sender===state.currentUser ? 'me':'them');
+    b.innerHTML = `${escapeHtml(m.text)}<span class="meta">${m.senderName} · ${m.time}</span>`;
+    box.appendChild(b);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+function sendChat(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const me = state.partners[state.currentUser];
+  state.messages.push({sender:state.currentUser, senderName:me.nickname||'You', text, time:nowTime()});
+  input.value='';
+  renderChat();
+  // gentle simulated reply so the space feels alive
+  const box = document.getElementById('chatBox');
+  const typing = document.createElement('div');
+  typing.className='typing';
+  const other = state.partners[otherIdx()];
+  typing.textContent = `${other.nickname||'They'} is typing...`;
+  box.appendChild(typing);
+  box.scrollTop = box.scrollHeight;
+  setTimeout(()=>{
+    typing.remove();
+    state.messages.push({sender:otherIdx(), senderName:other.nickname||'Them', text:cannedReplies[Math.floor(Math.random()*cannedReplies.length)], time:nowTime()});
+    renderChat();
+  }, 1100+Math.random()*900);
+}
+function nowTime(){ const d=new Date(); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+/* ============ GAMES: Tic Tac Toe ============ */
+let ttt = Array(9).fill(null);
+let tttTurn = 0;
+function openTTT(){ resetTTT(); goTo('s-ttt'); }
+function resetTTT(){
+  ttt = Array(9).fill(null); tttTurn = 0;
+  renderTTT();
+}
+function renderTTT(){
+  const grid = document.getElementById('tttGrid');
+  grid.innerHTML='';
+  ttt.forEach((v,i)=>{
+    const b=document.createElement('button');
+    b.className='ttt-cell';
+    b.textContent = v==='X' ? '❤️' : (v==='O' ? '⭐' : '');
+    b.onclick=()=>tttMove(i);
+    grid.appendChild(b);
+  });
+  const p = state.partners[tttTurn];
+  document.getElementById('tttBanner').textContent = `${p.nickname||'Player'}'s turn (${tttTurn===0?'❤️':'⭐'})`;
+  const win = tttWinner();
+  if(win){
+    const winner = state.partners[win==='X'?0:1];
+    document.getElementById('tttBanner').textContent = `${winner.nickname||'Someone'} wins! 🎉`;
+  } else if(ttt.every(c=>c)){
+    document.getElementById('tttBanner').textContent = `It's a sweet little tie 💞`;
+  }
+}
+function tttMove(i){
+  if(ttt[i] || tttWinner()) return;
+  ttt[i] = tttTurn===0 ? 'X':'O';
+  tttTurn = tttTurn===0?1:0;
+  renderTTT();
+}
+function tttWinner(){
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const [a,b,c] of lines){ if(ttt[a] && ttt[a]===ttt[b] && ttt[a]===ttt[c]) return ttt[a]; }
+  return null;
+}
+
+/* ============ GAMES: Memory Match ============ */
+let memCards = [], memFlipped = [], memMatched = [], memLock=false;
+function openMemory(){ resetMemory(); goTo('s-memory'); }
+function resetMemory(){
+  const pool = ['💗','🌹','🎁','☕','🌙','🍓','🎶','✨'];
+  let deck = [...pool, ...pool].map((em,i)=>({id:i, em}));
+  deck.sort(()=>Math.random()-.5);
+  memCards = deck; memFlipped=[]; memMatched=[]; memLock=false;
+  document.getElementById('memBanner').textContent = 'Find the matching pairs';
+  renderMemory();
+}
+function renderMemory(){
+  const grid = document.getElementById('memGrid');
+  grid.innerHTML='';
+  memCards.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='mem-card' + (memFlipped.includes(i)||memMatched.includes(i) ? ' flip':'') + (memMatched.includes(i)?' matched':'');
+    d.textContent = c.em;
+    d.onclick=()=>flipMemory(i);
+    grid.appendChild(d);
+  });
+}
+function flipMemory(i){
+  if(memLock || memFlipped.includes(i) || memMatched.includes(i)) return;
+  memFlipped.push(i);
+  renderMemory();
+  if(memFlipped.length===2){
+    memLock=true;
+    const [a,b] = memFlipped;
+    if(memCards[a].em === memCards[b].em){
+      memMatched.push(a,b); memFlipped=[]; memLock=false;
+      renderMemory();
+      if(memMatched.length===memCards.length){
+        document.getElementById('memBanner').textContent = 'You found them all! 💞';
+      }
+    }else{
+      setTimeout(()=>{ memFlipped=[]; memLock=false; renderMemory(); }, 700);
+    }
+  }
+}
+
+/* ============ GAMES: Love Notes (write & erase board) ============ */
+function openNotes(){ renderNotes(); goTo('s-notes'); }
+function renderNotes(){
+  const board = document.getElementById('notesBoard');
+  board.innerHTML='';
+  if(state.notes.length===0){
+    board.innerHTML = '<div class="notes-empty">No notes pinned yet — write the first one 💌</div>';
+    return;
+  }
+  state.notes.forEach((n,i)=>{
+    const d=document.createElement('div');
+    d.className='sticky-note';
+    d.innerHTML = `${escapeHtml(n.text)}<span class="sn-author">${n.emoji||''} ${escapeHtml(n.author||'')}</span><button class="sn-erase" title="Erase" onclick="eraseNote(${i})">✕</button>`;
+    board.appendChild(d);
+  });
+}
+function addNote(){
+  const input = document.getElementById('noteInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const me = state.partners[state.currentUser];
+  state.notes.push({text, author:me.nickname||'You', emoji:me.emoji});
+  input.value='';
+  renderNotes();
+}
+function eraseNote(i){
+  state.notes.splice(i,1);
+  renderNotes();
+}
+
+/* ============ VIDEO CALL (simulated) ============ */
+let localStream = null, micOn=true, camOn=true;
+function startCall(){
+  const other = state.partners[otherIdx()];
+  document.getElementById('theirLabel').textContent = `Calling ${other.nickname||'them'}...`;
+  document.getElementById('theirPanel').innerHTML = `<span class="pulse-heart">💗</span><div class="label">Calling ${other.nickname||'them'}...</div>`;
+  setTimeout(()=>{
+    document.getElementById('theirPanel').innerHTML = `<span style="font-size:44px;">${other.emoji||'💞'}</span><div class="label">${other.nickname||'Them'} · connected</div>`;
+  }, 2200);
+  const me = state.partners[state.currentUser];
+  document.getElementById('myLabel').textContent = me.nickname || 'You';
+  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({video:true, audio:false}).then(stream=>{
+      localStream = stream;
+      const panel = document.getElementById('myPanel');
+      panel.innerHTML = '';
+      const vid = document.createElement('video');
+      vid.autoplay = true; vid.muted = true; vid.playsInline = true;
+      vid.srcObject = stream;
+      panel.appendChild(vid);
+      const lbl = document.createElement('div');
+      lbl.className='label'; lbl.textContent = me.nickname || 'You';
+      panel.appendChild(lbl);
+    }).catch(()=>{ /* camera not available, keep placeholder */ });
+  }
+}
+function endCall(){
+  if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
+  goBack();
+}
+function toggleMic(){ micOn=!micOn; document.getElementById('micBtn').classList.toggle('off', !micOn); document.getElementById('micBtn').textContent = micOn?'🎙️':'🔇'; }
+function toggleCam(){
+  camOn=!camOn;
+  document.getElementById('camBtn').classList.toggle('off', !camOn);
+  document.getElementById('camBtn').textContent = camOn?'📷':'🚫';
+  if(localStream) localStream.getVideoTracks().forEach(t=> t.enabled = camOn);
+}
+
+/* ============ CALENDAR ============ */
+function renderCalendar(){
+  const d = state.calDate;
+  const year = d.getFullYear(), month = d.getMonth();
+  document.getElementById('calMonthLabel').textContent = d.toLocaleDateString([], {month:'long', year:'numeric'});
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML='';
+  ['S','M','T','W','T','F','S'].forEach(dow=>{
+    const e=document.createElement('div'); e.className='dow'; e.textContent=dow; grid.appendChild(e);
+  });
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  for(let i=0;i<firstDay;i++){ const e=document.createElement('div'); e.className='cal-day empty'; grid.appendChild(e); }
+  const todayStr = new Date().toDateString();
+  for(let day=1; day<=daysInMonth; day++){
+    const key = `${year}-${month}-${day}`;
+    const cellDate = new Date(year,month,day);
+    const e=document.createElement('div');
+    e.className='cal-day' + (cellDate.toDateString()===todayStr ? ' today':'');
+    e.innerHTML = `<span>${day}</span>` + (state.events[key] && state.events[key].length ? '<span class="dot"></span>':'');
+    e.onclick=()=>selectDay(key, day);
+    grid.appendChild(e);
+  }
+  renderEventList();
+}
+let selectedDayKey=null;
+function selectDay(key, day){
+  selectedDayKey = key;
+  document.getElementById('calAddForm').style.display='block';
+  document.getElementById('eventTitle').placeholder = `Something for the ${day}${ordSuffix(day)}...`;
+  document.getElementById('eventTitle').focus();
+}
+function ordSuffix(n){ const s=["th","st","nd","rd"], v=n%100; return s[(v-20)%10]||s[v]||s[0]; }
+function addEvent(){
+  const t = document.getElementById('eventTitle').value.trim();
+  if(!t || !selectedDayKey) return;
+  if(!state.events[selectedDayKey]) state.events[selectedDayKey]=[];
+  state.events[selectedDayKey].push(t);
+  document.getElementById('eventTitle').value='';
+  renderCalendar();
+}
+function renderEventList(){
+  const list = document.getElementById('eventList');
+  list.innerHTML='';
+  const keys = Object.keys(state.events).filter(k=>state.events[k].length);
+  if(keys.length===0){ list.innerHTML = '<div class="photo-empty">No plans yet — pick a day above 💕</div>'; return; }
+  keys.forEach(k=>{
+    const [y,m,day] = k.split('-');
+    state.events[k].forEach((title, idx)=>{
+      const item=document.createElement('div');
+      item.className='event-item';
+      item.innerHTML = `<span>📌 ${escapeHtml(title)} — ${parseInt(m)+1}/${day}</span><span class="del" onclick="removeEvent('${k}',${idx})">✕</span>`;
+      list.appendChild(item);
+    });
+  });
+}
+function removeEvent(key, idx){ state.events[key].splice(idx,1); renderCalendar(); }
+function changeMonth(delta){
+  state.calDate = new Date(state.calDate.getFullYear(), state.calDate.getMonth()+delta, 1);
+  renderCalendar();
+}
+
+/* ============ MUSIC ============ */
+let playingIdx = null;
+function renderMusic(){
+  const list = document.getElementById('playlist');
+  list.innerHTML='';
+  state.songs.forEach((s,i)=>{
+    const row=document.createElement('div');
+    row.className='playlist-item';
+    const hasAudio = !!s.audioUrl;
+    row.innerHTML = `<span class="play-mini" onclick="playSong(${i})">${playingIdx===i?'⏸️':'▶️'}</span>
+      <div class="song-meta"><b>${escapeHtml(s.title)}</b><div>${escapeHtml(s.artist)}${hasAudio ? '' : ' · title only, no audio'}</div></div>`;
+    list.appendChild(row);
+  });
+  updateNowPlaying();
+}
+function playSong(i){
+  const player = document.getElementById('audioPlayer');
+  const s = state.songs[i];
+  if(playingIdx===i){
+    player.pause();
+    playingIdx = null;
+    renderMusic();
+    return;
+  }
+  if(!s.audioUrl){
+    // no real audio for this entry - let them know instead of faking it
+    player.pause();
+    playingIdx = null;
+    renderMusic();
+    alert(`"${s.title}" is a title-only entry with no sound. Upload an audio file below to actually hear something play.`);
+    return;
+  }
+  player.src = s.audioUrl;
+  player.play();
+  playingIdx = i;
+  renderMusic();
+}
+function onSongEnded(){
+  playingIdx = null;
+  renderMusic();
+}
+function updateNowPlaying(){
+  const vinyl = document.getElementById('vinyl');
+  const eq = document.getElementById('eqBars');
+  if(playingIdx!==null){
+    const s = state.songs[playingIdx];
+    document.getElementById('npTitle').textContent = s.title;
+    document.getElementById('npArtist').textContent = s.artist;
+    vinyl.classList.add('spin');
+    eq.style.display='flex';
+  }else{
+    document.getElementById('npTitle').textContent = state.songs.length ? 'Paused' : 'Nothing yet';
+    document.getElementById('npArtist').textContent = state.songs.length ? 'Tap play on a song' : 'Add a song below';
+    vinyl.classList.remove('spin');
+    eq.style.display='none';
+  }
+}
+function addSong(){
+  const t = document.getElementById('songTitle').value.trim();
+  const a = document.getElementById('songArtist').value.trim();
+  if(!t) return;
+  state.songs.push({title:t, artist:a||'Unknown'});
+  document.getElementById('songTitle').value=''; document.getElementById('songArtist').value='';
+  renderMusic();
+}
+function uploadSong(evt){
+  const file = evt.target.files && evt.target.files[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  const niceName = file.name.replace(/\.[^/.]+$/, '');
+  state.songs.unshift({title:niceName, artist:'Uploaded by you', audioUrl:url});
+  evt.target.value='';
+  renderMusic();
+  playSong(0);
+}
+
+/* ============ PHOTOS ============ */
+function renderPhotos(){
+  const grid = document.getElementById('photoGrid');
+  grid.innerHTML='';
+  if(state.photos.length===0){
+    grid.innerHTML = '<div class="photo-empty" style="grid-column:1/-1;">No memories added yet 🤍</div>';
+    return;
+  }
+  state.photos.forEach((p,i)=>{
+    const t=document.createElement('div');
+    t.className='photo-thumb';
+    t.innerHTML = `<img src="${p.src}">`;
+    t.onclick=()=>openLightbox(i);
+    grid.appendChild(t);
+  });
+}
+function addPhotos(evt){
+  const files = Array.from(evt.target.files || []);
+  let remaining = files.length;
+  files.forEach(f=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      state.photos.push({src:reader.result, caption:''});
+      renderPhotos();
+    };
+    reader.readAsDataURL(f);
+  });
+  evt.target.value='';
+}
+function openLightbox(i){
+  const p = state.photos[i];
+  const host = document.getElementById('lightboxHost');
+  host.innerHTML = `
+    <div class="lightbox">
+      <img src="${p.src}">
+      <input type="text" id="captionInput" placeholder="Add a little caption..." value="${escapeHtml(p.caption||'')}">
+      <div class="lb-actions">
+        <button class="btn btn-ghost" style="width:auto;margin:0;padding:10px 18px;" onclick="saveCaption(${i})">Save caption</button>
+        <button class="btn btn-ghost" style="width:auto;margin:0;padding:10px 18px;" onclick="deletePhoto(${i})">Delete</button>
+        <button class="btn btn-primary" style="width:auto;margin:0;padding:10px 18px;" onclick="closeLightbox()">Close</button>
+      </div>
+    </div>`;
+}
+function saveCaption(i){
+  state.photos[i].caption = document.getElementById('captionInput').value.trim();
+  closeLightbox();
+}
+function deletePhoto(i){
+  state.photos.splice(i,1);
+  closeLightbox();
+  renderPhotos();
+}
+function closeLightbox(){ document.getElementById('lightboxHost').innerHTML=''; }
+
+/* ============ SETTINGS ============ */
+function renderSettings(){
+  document.getElementById('set-coupleName').value = state.coupleName;
+  document.getElementById('set-anniversary').value = state.anniversary;
+  document.getElementById('set-p1name').value = state.partners[0].nickname;
+  document.getElementById('set-p2name').value = state.partners[1].nickname;
+  document.getElementById('set-av1').style.background = state.partners[0].color;
+  document.getElementById('set-av1').textContent = state.partners[0].emoji;
+  document.getElementById('set-av2').style.background = state.partners[1].color;
+  document.getElementById('set-av2').textContent = state.partners[1].emoji;
+}
+function saveSettings(){
+  state.coupleName = document.getElementById('set-coupleName').value.trim() || state.coupleName;
+  state.anniversary = document.getElementById('set-anniversary').value || state.anniversary;
+  state.partners[0].nickname = document.getElementById('set-p1name').value.trim() || state.partners[0].nickname;
+  state.partners[1].nickname = document.getElementById('set-p2name').value.trim() || state.partners[1].nickname;
+  goBack();
+}
+</script>
+</body>
+</html>
